@@ -4,10 +4,10 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { AuditProvider } from './contexts/AuditContext';
 import Login from './pages/Login';
 import Layout from './components/Layout';
-import Dashboard from './pages/Dashboard';
 import CasesList from './pages/CasesList';
 import CaseDetail from './pages/CaseDetail';
 import AuditTrail from './pages/AuditTrail';
+
 
 const ProtectedRoute = ({ children, requireRole }: { children: React.ReactNode, requireRole?: string[] }) => {
   const { user } = useAuth();
@@ -21,12 +21,13 @@ const AppRoutes = () => {
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
-        <Route index element={<Navigate to="/dashboard" replace />} />
-        <Route path="dashboard" element={<Dashboard />} />
+        <Route index element={<Navigate to="/cases" replace />} />
         <Route path="cases" element={<CasesList />} />
         <Route path="cases/:id" element={<CaseDetail />} />
+        <Route path="dashboard" element={<Navigate to="/cases" replace />} />
         <Route path="audit" element={<AuditTrail />} />
       </Route>
+
 
     </Routes>
   );

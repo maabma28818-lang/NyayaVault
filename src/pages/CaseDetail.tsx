@@ -5,9 +5,25 @@ import { generateHash, encryptFile, decryptFile } from '../utils/cryptoUtils';
 import type { Case, DocumentMetadata, EvidenceObject } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { useAudit } from '../contexts/AuditContext';
-import { Upload, ShieldCheck, ShieldAlert, FileText, Bug, X, Share2, Eye, Edit3, Check, Sparkles } from 'lucide-react';
+import { 
+  Upload, 
+  ShieldCheck, 
+  ShieldAlert, 
+  FileText, 
+  Bug, 
+  X, 
+  Share2, 
+  Eye, 
+  Edit3, 
+  Check, 
+  Sparkles, 
+  ArrowLeft, 
+  FolderOpen, 
+  UserCheck 
+} from 'lucide-react';
 import { IntelligentUploadModal } from '../components/IntelligentUploadModal';
 import { VerificationDemo } from '../components/VerificationDemo';
+
 
 
 
@@ -205,47 +221,133 @@ const CaseDetail = () => {
 
   return (
     <div className="animate-fade-in">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
-        <div>
-          {isEditingTitle ? (
-            <form onSubmit={handleSaveTitle} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-              <input 
-                type="text" 
-                className="input" 
-                value={editedTitle} 
-                onChange={e => setEditedTitle(e.target.value)} 
-                style={{ fontSize: '1.25rem', fontWeight: 600, padding: '0.4rem 0.75rem', width: '360px' }}
-                autoFocus
-                required
-              />
-              <button type="submit" className="btn-primary" style={{ padding: '0.4rem 0.75rem', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
-                <Check size={16} /> Save
-              </button>
-              <button type="button" className="btn-secondary" style={{ padding: '0.4rem 0.75rem' }} onClick={() => setIsEditingTitle(false)}>
-                <X size={16} /> Cancel
-              </button>
-            </form>
-          ) : (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.25rem' }}>
-              <h1 style={{ margin: 0 }}>{caseData.title}</h1>
-              {canUpload && (
-                <button 
-                  className="btn-secondary" 
-                  style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
-                  onClick={() => { setIsEditingTitle(true); setEditedTitle(caseData.title); }}
-                  title="Rename Case"
-                >
-                  <Edit3 size={14} /> Rename
-                </button>
-              )}
-            </div>
-          )}
-          <p style={{ color: 'var(--text-muted)' }}>{caseData.description}</p>
-        </div>
-        <span className={`badge ${caseData.status === 'Open' ? 'badge-warning' : 'badge-neutral'}`}>
-          {caseData.status}
-        </span>
+      {/* Back Navigation Button */}
+      <div style={{ marginBottom: '1.25rem' }}>
+        <button 
+          onClick={() => navigate('/cases')}
+          className="btn-secondary"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.4rem',
+            padding: '0.4rem 0.85rem',
+            fontSize: '0.825rem',
+            color: '#94a3b8'
+          }}
+        >
+          <ArrowLeft size={15} /> Back to Cases & Documents
+        </button>
       </div>
+
+      {/* Case Dashboard Header Card */}
+      <div className="card" style={{ marginBottom: '2rem', border: '1px solid rgba(59, 130, 246, 0.3)', background: 'linear-gradient(145deg, #131a2b 0%, #0c101c 100%)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1.25rem', marginBottom: '1.25rem' }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.35rem' }}>
+              <span style={{
+                background: 'rgba(59, 130, 246, 0.15)',
+                color: '#60a5fa',
+                fontSize: '0.725rem',
+                fontWeight: 700,
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                padding: '0.15rem 0.5rem',
+                borderRadius: '4px',
+                fontFamily: 'monospace'
+              }}>
+                CASE: {caseData.caseNumber || caseData.id}
+              </span>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>•</span>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                Created {new Date(caseData.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
+              </span>
+            </div>
+
+            {isEditingTitle ? (
+              <form onSubmit={handleSaveTitle} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                <input 
+                  type="text" 
+                  className="input" 
+                  value={editedTitle} 
+                  onChange={e => setEditedTitle(e.target.value)} 
+                  style={{ fontSize: '1.25rem', fontWeight: 600, padding: '0.4rem 0.75rem', width: '360px' }}
+                  autoFocus
+                  required
+                />
+                <button type="submit" className="btn-primary" style={{ padding: '0.4rem 0.75rem', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                  <Check size={16} /> Save
+                </button>
+                <button type="button" className="btn-secondary" style={{ padding: '0.4rem 0.75rem' }} onClick={() => setIsEditingTitle(false)}>
+                  <X size={16} /> Cancel
+                </button>
+              </form>
+            ) : (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.25rem' }}>
+                <h1 style={{ margin: 0, fontSize: '1.75rem', fontWeight: 800, color: '#ffffff' }}>{caseData.title}</h1>
+                {canUpload && (
+                  <button 
+                    className="btn-secondary" 
+                    style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
+                    onClick={() => { setIsEditingTitle(true); setEditedTitle(caseData.title); }}
+                    title="Rename Case"
+                  >
+                    <Edit3 size={14} /> Rename
+                  </button>
+                )}
+              </div>
+            )}
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', margin: '0.35rem 0 0 0' }}>{caseData.description}</p>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <span className={`badge ${caseData.status === 'Open' ? 'badge-warning' : 'badge-neutral'}`} style={{ fontSize: '0.825rem', padding: '0.35rem 0.75rem' }}>
+              {caseData.status} Investigation
+            </span>
+          </div>
+        </div>
+
+        {/* Case Metrics Bar */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+          gap: '1rem',
+          background: 'rgba(15, 23, 42, 0.6)',
+          padding: '1rem 1.25rem',
+          borderRadius: '10px',
+          border: '1px solid rgba(255, 255, 255, 0.05)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <div style={{ background: 'rgba(59, 130, 246, 0.15)', padding: '0.5rem', borderRadius: '8px' }}>
+              <FolderOpen size={18} color="#60a5fa" />
+            </div>
+            <div>
+              <div style={{ fontSize: '0.725rem', color: '#94a3b8', textTransform: 'uppercase' }}>Evidence Objects</div>
+              <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#ffffff' }}>{docs.length} Documents</div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <div style={{ background: 'rgba(16, 185, 129, 0.15)', padding: '0.5rem', borderRadius: '8px' }}>
+              <ShieldCheck size={18} color="#10b981" />
+            </div>
+            <div>
+              <div style={{ fontSize: '0.725rem', color: '#94a3b8', textTransform: 'uppercase' }}>Zero-Trust Security</div>
+              <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#34d399' }}>AES-256 + SHA-256</div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <div style={{ background: 'rgba(245, 158, 11, 0.15)', padding: '0.5rem', borderRadius: '8px' }}>
+              <UserCheck size={18} color="#fbbf24" />
+            </div>
+            <div>
+              <div style={{ fontSize: '0.725rem', color: '#94a3b8', textTransform: 'uppercase' }}>Investigating Officer</div>
+              <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#ffffff' }}>{caseData.investigatingOfficer || 'Inspector Raj'}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
 
       <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>
         <div>

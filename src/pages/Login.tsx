@@ -11,9 +11,10 @@ const Login = () => {
 
   useEffect(() => {
     if (user) {
-      navigate('/dashboard');
+      navigate('/cases');
     }
   }, [user, navigate]);
+
 
   const handleLogin = (userId: string) => {
     login(userId);

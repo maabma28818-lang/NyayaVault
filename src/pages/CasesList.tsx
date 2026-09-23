@@ -5,7 +5,8 @@ import type { Case, EvidenceObject } from '../types';
 import { getCases, saveCase, saveDocumentMetadata } from '../utils/storageUtils';
 import { useAuth } from '../contexts/AuthContext';
 import { useAudit } from '../contexts/AuditContext';
-import { Plus, Search, Edit3, X, Sparkles } from 'lucide-react';
+import { Plus, Search, Edit3, X, Sparkles, ArrowRight } from 'lucide-react';
+
 import { IntelligentUploadModal } from '../components/IntelligentUploadModal';
 
 const CasesList = () => {
@@ -133,32 +134,50 @@ const CasesList = () => {
             )}
             {filtered.map(c => (
               <tr key={c.id}>
-                <td style={{ fontWeight: 500 }}>{c.title}</td>
+                <td>
+                  <div style={{ fontWeight: 600, color: '#ffffff', fontSize: '0.95rem' }}>{c.title}</div>
+                  <div style={{ fontSize: '0.75rem', color: '#60a5fa', fontFamily: 'monospace', marginTop: '0.15rem' }}>
+                    ID: {c.caseNumber || c.id}
+                  </div>
+                </td>
                 <td>
                   <span className={`badge ${c.status === 'Open' ? 'badge-warning' : 'badge-neutral'}`}>
                     {c.status}
                   </span>
                 </td>
-                <td>{new Date(c.createdAt).toLocaleDateString()}</td>
+                <td style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
+                  {new Date(c.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
+                </td>
                 <td>
                   <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                    <button className="btn-secondary" onClick={() => navigate(`/cases/${c.id}`)}>
-                      View Details
+                    <button 
+                      className="btn-primary" 
+                      onClick={() => navigate(`/cases/${c.id}`)}
+                      style={{
+                        padding: '0.45rem 0.9rem',
+                        fontSize: '0.825rem',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.35rem'
+                      }}
+                    >
+                      More Details <ArrowRight size={14} />
                     </button>
                     {canManage && (
                       <button 
                         className="btn-secondary" 
                         onClick={() => handleOpenRename(c)}
                         title="Rename Case"
-                        style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
+                        style={{ padding: '0.45rem 0.75rem', fontSize: '0.825rem', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
                       >
-                        <Edit3 size={14} /> Rename
+                        <Edit3 size={13} /> Rename
                       </button>
                     )}
                   </div>
                 </td>
               </tr>
             ))}
+
           </tbody>
         </table>
       </div>
