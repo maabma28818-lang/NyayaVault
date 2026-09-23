@@ -12,28 +12,50 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
   const [users, setUsersList] = useState<User[]>([]);
+  const [user, setUser] = useState<User | null>(() => {
+    try {
+      const saved = localStorage.getItem('nv_current_user');
+      if (saved) return JSON.parse(saved);
+      // Only default on very first visit before any explicit logout
+      const isLoggedOut = sessionStorage.getItem('nv_logged_out');
+      if (isLoggedOut === 'true') return null;
+      const initialUsers = getUsers();
+      return initialUsers[0] || null;
+    } catch {
+      return null;
+    }
+  });
 
   useEffect(() => {
-    setUsersList(getUsers());
+    const loadedUsers = getUsers();
+    setUsersList(loadedUsers);
   }, []);
 
   const login = (userId: string) => {
-    const found = users.find(u => u.id === userId);
-    if (found) setUser(found);
+    const currentUsers = users.length > 0 ? users : getUsers();
+    const found = currentUsers.find(u => u.id === userId);
+    if (found) {
+      sessionStorage.removeItem('nv_logged_out');
+      setUser(found);
+      localStorage.setItem('nv_current_user', JSON.stringify(found));
+    }
   };
 
   const logout = () => {
+    sessionStorage.setItem('nv_logged_out', 'true');
+    localStorage.removeItem('nv_current_user');
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, users }}>
+    <AuthContext.Provider value={{ user, login, logout, users: users.length > 0 ? users : getUsers() }}>
       {children}
     </AuthContext.Provider>
   );
 };
+
+
 
 export const useAuth = () => {
   const context = useContext(AuthContext);

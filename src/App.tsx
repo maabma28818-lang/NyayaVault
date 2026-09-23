@@ -25,12 +25,9 @@ const AppRoutes = () => {
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="cases" element={<CasesList />} />
         <Route path="cases/:id" element={<CaseDetail />} />
-        <Route path="audit" element={
-          <ProtectedRoute requireRole={['Admin']}>
-            <AuditTrail />
-          </ProtectedRoute>
-        } />
+        <Route path="audit" element={<AuditTrail />} />
       </Route>
+
     </Routes>
   );
 };

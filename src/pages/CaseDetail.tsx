@@ -2,10 +2,16 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getCases, saveCase, getDocumentsForCase, saveDocumentMetadata, saveEncryptedFile, getEncryptedFile, tamperWithFile } from '../utils/storageUtils';
 import { generateHash, encryptFile, decryptFile } from '../utils/cryptoUtils';
-import type {  Case, DocumentMetadata  } from '../types';
+import type { Case, DocumentMetadata, EvidenceObject } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { useAudit } from '../contexts/AuditContext';
-import { Upload, ShieldCheck, ShieldAlert, FileText, Bug, X, Share2, Eye, Edit3, Check } from 'lucide-react';
+import { Upload, ShieldCheck, ShieldAlert, FileText, Bug, X, Share2, Eye, Edit3, Check, Sparkles } from 'lucide-react';
+import { IntelligentUploadModal } from '../components/IntelligentUploadModal';
+import { VerificationDemo } from '../components/VerificationDemo';
+
+
+
+
 
 const CaseDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -29,8 +35,10 @@ const CaseDetail = () => {
   const [shareDoc, setShareDoc] = useState<DocumentMetadata | null>(null);
   const [shareSuccess, setShareSuccess] = useState(false);
   const [docPreviewUrl, setDocPreviewUrl] = useState<string | null>(null);
+  const [isAiIngestOpen, setIsAiIngestOpen] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+
 
   useEffect(() => {
     if (id) {
@@ -241,17 +249,25 @@ const CaseDetail = () => {
 
       <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>
         <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-            <h2>Documents</h2>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+            <h2>Evidence & Documents</h2>
             {canUpload && (
-              <div>
+              <div style={{ display: 'flex', gap: '0.75rem' }}>
                 <input type="file" ref={fileInputRef} style={{ display: 'none' }} onChange={e => handleUpload(e)} />
+                <button 
+                  className="btn-secondary" 
+                  onClick={() => setIsAiIngestOpen(true)}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', border: '1px solid rgba(59, 130, 246, 0.4)', color: '#60a5fa' }}
+                >
+                  <Sparkles size={16} /> AI Ingest Pipeline
+                </button>
                 <button className="btn-primary" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
                   {uploading ? 'Processing...' : <><Upload size={16} style={{ display: 'inline', marginRight: '0.5rem' }} /> Upload Evidence</>}
                 </button>
               </div>
             )}
           </div>
+
 
           <div className="table-container">
             <table>
@@ -346,6 +362,35 @@ const CaseDetail = () => {
           </div>
         </div>
       </div>
+
+      {/* SIH Video Pitch Verification & Tamper Simulation Console */}
+      <div style={{ marginTop: '2.5rem' }}>
+        <VerificationDemo 
+          evidence={{
+            id: docs[0]?.id || "NV-EV-2026-000184",
+            caseId: caseData.id,
+            name: docs[0]?.name || "Forensic_Report_Apex_Storage_Dump_v1.pdf",
+            title: "Forensic Report",
+            type: docs[0]?.type || "application/pdf",
+            size: docs[0]?.size || 2457600,
+            uploadedBy: docs[0]?.uploadedBy || user?.id || "u1",
+            uploadedAt: docs[0]?.uploadedAt || "2026-03-01T14:45:00.000Z",
+            passport: docs[0]?.passport || {
+              evidenceId: docs[0]?.id || "NV-EV-2026-000184",
+              originalHash: docs[0]?.hash || "A9F82E8C3B...",
+              classification: "Forensic Evidence",
+              aiConfidence: 94,
+              version: `V${docs[0]?.version || 1}`,
+              integrityStatus: "VERIFIED",
+              currentCustodian: "Forensic Laboratory",
+              blockchainTx: "TX-982374",
+              legalHold: "ACTIVE"
+            }
+          }}
+        />
+      </div>
+
+
 
       {/* View Document Modal */}
       {viewDoc && (
@@ -455,8 +500,37 @@ const CaseDetail = () => {
           </div>
         </div>
       )}
+
+      {/* Intelligent Upload Modal */}
+      {caseData && (
+        <IntelligentUploadModal 
+          isOpen={isAiIngestOpen}
+          onClose={() => setIsAiIngestOpen(false)}
+          targetCaseId={caseData.id}
+          onSuccess={(evidence: EvidenceObject) => {
+            const newDocMeta: DocumentMetadata = {
+              id: evidence.id,
+              caseId: caseData.id,
+              name: evidence.name,
+              type: evidence.type,
+              size: evidence.size,
+              hash: evidence.passport.originalHash,
+              uploadedBy: user?.id || 'u1',
+              uploadedAt: new Date().toISOString(),
+              version: 1,
+              previousVersionId: null,
+              ivArray: [12, 45, 78, 23, 89, 101, 214, 53, 90, 11, 44, 76],
+              passport: evidence.passport
+            };
+            saveDocumentMetadata(newDocMeta);
+            logAction('UPLOAD_DOC', `AI Ingested "${evidence.title}" with Evidence Passport ${evidence.passport.evidenceId}`);
+            setDocs(getDocumentsForCase(caseData.id));
+          }}
+        />
+      )}
     </div>
   );
 };
 
 export default CaseDetail;
+

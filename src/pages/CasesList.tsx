@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import type { Case } from '../types';
-import { getCases, saveCase } from '../utils/storageUtils';
+import type { Case, EvidenceObject } from '../types';
+
+import { getCases, saveCase, saveDocumentMetadata } from '../utils/storageUtils';
 import { useAuth } from '../contexts/AuthContext';
 import { useAudit } from '../contexts/AuditContext';
-import { Plus, Search, Edit3, X } from 'lucide-react';
+import { Plus, Search, Edit3, X, Sparkles } from 'lucide-react';
+import { IntelligentUploadModal } from '../components/IntelligentUploadModal';
 
 const CasesList = () => {
   const [cases, setCases] = useState<Case[]>([]);
@@ -18,10 +20,14 @@ const CasesList = () => {
   // Rename Modal State
   const [editingCase, setEditingCase] = useState<Case | null>(null);
   const [renameTitle, setRenameTitle] = useState('');
+  
+  // AI Ingest Modal State
+  const [isAiIngestOpen, setIsAiIngestOpen] = useState(false);
 
   const { user } = useAuth();
   const { logAction } = useAudit();
   const navigate = useNavigate();
+
 
   const loadCases = () => {
     setCases(getCases());
@@ -78,14 +84,24 @@ const CasesList = () => {
 
   return (
     <div className="animate-fade-in">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
         <h1>Cases & Documents</h1>
         {canManage && (
-          <button className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }} onClick={handleOpenCreate}>
-            <Plus size={18} /> New Case
-          </button>
+          <div style={{ display: 'flex', gap: '0.75rem' }}>
+            <button 
+              className="btn-secondary" 
+              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', border: '1px solid rgba(59, 130, 246, 0.4)', color: '#60a5fa' }} 
+              onClick={() => setIsAiIngestOpen(true)}
+            >
+              <Sparkles size={18} /> AI Ingest Evidence
+            </button>
+            <button className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }} onClick={handleOpenCreate}>
+              <Plus size={18} /> New Case
+            </button>
+          </div>
         )}
       </div>
+
 
       <div className="card" style={{ padding: '1rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
         <Search size={20} color="var(--text-muted)" />
@@ -244,9 +260,35 @@ const CasesList = () => {
           </div>
         </div>
       )}
+
+      {/* Intelligent Upload Modal */}
+      <IntelligentUploadModal 
+        isOpen={isAiIngestOpen}
+        onClose={() => setIsAiIngestOpen(false)}
+        targetCaseId="MH-MUM-2026-00421"
+        onSuccess={(evidence: EvidenceObject) => {
+          saveDocumentMetadata({
+            id: evidence.id,
+            caseId: evidence.caseId,
+            name: evidence.name,
+            type: evidence.type,
+            size: evidence.size,
+            hash: evidence.passport.originalHash,
+            uploadedBy: user?.id || 'u1',
+            uploadedAt: new Date().toISOString(),
+            version: 1,
+            previousVersionId: null,
+            ivArray: [12, 45, 78, 23, 89, 101, 214, 53, 90, 11, 44, 76],
+            passport: evidence.passport
+          });
+          logAction('UPLOAD_DOC', `AI Ingested "${evidence.title}" with Evidence Passport ${evidence.passport.evidenceId}`);
+          loadCases();
+        }}
+      />
     </div>
   );
 };
 
 export default CasesList;
+
 

@@ -48,21 +48,20 @@ const Layout = () => {
             <Folder size={20} /> Cases & Documents
           </NavLink>
 
-          {user?.role === 'Admin' && (
-            <NavLink 
-              to="/audit" 
-              style={({ isActive }) => ({
-                display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem',
-                borderRadius: '6px',
-                backgroundColor: isActive ? 'var(--bg-tertiary)' : 'transparent',
-                color: isActive ? 'var(--accent-primary)' : 'var(--text-primary)',
-                border: isActive ? '1px solid var(--border-strong)' : '1px solid transparent',
-              })}
-            >
-              <ShieldAlert size={20} /> Audit Trail
-            </NavLink>
-          )}
+          <NavLink 
+            to="/audit" 
+            style={({ isActive }) => ({
+              display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem',
+              borderRadius: '6px',
+              backgroundColor: isActive ? 'var(--bg-tertiary)' : 'transparent',
+              color: isActive ? 'var(--accent-primary)' : 'var(--text-primary)',
+              border: isActive ? '1px solid var(--border-strong)' : '1px solid transparent',
+            })}
+          >
+            <ShieldAlert size={20} /> Audit Trail
+          </NavLink>
         </nav>
+
 
         <div style={{ padding: '1.5rem 1rem', borderTop: '1px solid var(--glass-border)' }}>
           <button className="btn-secondary" style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }} onClick={handleLogout}>
